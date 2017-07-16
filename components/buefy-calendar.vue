@@ -2,14 +2,14 @@
     <div class="container">
         <div class="columns is-hidden-mobile">
             <div class="column has-text-left"><a v-on:click="previous()"><i class="fa button is-primary fa-chevron-left"></i></a></div>
-            <div class="column has-text-centered"><h2 class="title is-2">{{currentMonth.format("MMMM YYYY")}}</h2></div>
+            <div class="column is-half has-text-centered"><h2 class="title is-2" v-text="monthAndYear"></h2></div>
             <div class="column has-text-right"><a v-on:click="next()"><i class="fa button is-primary fa-chevron-right"></i></a></div>
         </div>
 
         <div class="rows is-hidden-tablet">
             <div class="row has-text-centered"><a v-on:click="previous()"><i class="button is-primary is-fullwidth fa fa-chevron-up"></i></a></div>
             <hr/>
-            <div class="row has-text-centered"><h2 class="title is-2">{{currentMonth.format("MMMM YYYY")}}</h2></div>
+            <div class="row has-text-centered"><h2 class="title is-2" v-text="monthAndYear"></h2></div>
             <hr/>
             <div class="row has-text-centered"><a v-on:click="next()"><i class="button is-primary is-fullwidth fa fa-chevron-down"></i></a></div>
         </div>
@@ -50,6 +50,10 @@
           ordinals: {
             type: Boolean,
             default: true,
+          },
+          locale: {
+            type: String,
+            default: 'en',
           }
         },
         data() {
@@ -59,14 +63,19 @@
                 dates: {},
             }
         },
+        computed: {
+          monthAndYear() {
+            return this.currentMonth.format("MMMM YYYY", this.locale);
+          }
+        },
         methods: {
           previous() {
-            this.currentMonth.subtract(1, "months");
+            this.currentMonth = moment(this.currentMonth).subtract(1, "months");
             this.dates = this.getDates(this.currentMonth);
             this.$emit('previous');
           },
           next() {
-            this.currentMonth.add(1, "months");
+            this.currentMonth = moment(this.currentMonth).add(1, "months");
             this.dates = this.getDates(this.currentMonth);
             this.$emit('next');
           },
@@ -92,6 +101,10 @@
             'calendar-date': CalendarDate
         },
         created() {
+          moment.locale("es", {
+            months : 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
+            monthsShort : 'ENE_FEB_MAR_ABR_MAY_JUN_JUL_AGO_SEP_OCT_NOV_DIC'.split('_'),
+          });
           this.dates = this.getDates(now);
         },
     }
