@@ -38,26 +38,6 @@
 
     const now = new moment(new Date().setDate(1));
 
-    function getEmptyDate() {
-        return { date: null, class: "is-hidden-mobile disabled" };
-    }
-
-    function getDates(start) {
-        const days = Array.apply(null, { length: moment().daysInMonth() })
-            .map(Number.call, Number)
-            .map(function (i) {
-                const d = start.clone().add(i, "days");
-                return { date: d.format("Do"), key: d.format("YYYY-MM-DD") };
-            });
-
-        var dates = new Array(start.day()).fill(getEmptyDate()).concat(days);
-        var length = dates.length;
-        dates.length = 36;
-        dates.fill(getEmptyDate(), length);
-
-        return dates;
-    }
-
     export default {
         props: {
           events: Object,
@@ -66,29 +46,53 @@
             default: [
               "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
             ],
+          },
+          ordinals: {
+            type: Boolean,
+            default: true,
           }
         },
         data() {
             return {
                 showDates: true,
                 currentMonth: now,
-                dates: getDates(now),
+                dates: {},
             }
         },
         methods: {
-            previous: function (offset) {
-                this.currentMonth.subtract(1, "months");
-                this.dates = getDates(this.currentMonth);
-                this.$emit('previous');
-            },
-            next: function (offset) {
-                this.currentMonth.add(1, "months");
-                this.dates = getDates(this.currentMonth);
-                this.$emit('next');
-            }
+          previous() {
+            this.currentMonth.subtract(1, "months");
+            this.dates = this.getDates(this.currentMonth);
+            this.$emit('previous');
+          },
+          next() {
+            this.currentMonth.add(1, "months");
+            this.dates = this.getDates(this.currentMonth);
+            this.$emit('next');
+          },
+          getDates(start) {
+            const days = Array.apply(null, {length: moment().daysInMonth()})
+              .map(Number.call, Number)
+              .map((i) => {
+                const d = start.clone().add(i, "days");
+                return {date: this.ordinals ? d.format("Do") : d.format("D"), key: d.format("YYYY-MM-DD")};
+              });
+
+            var dates = new Array(start.day()).fill(this.getEmptyDate()).concat(days);
+            var length = dates.length;
+            dates.length = 36;
+            dates.fill(this.getEmptyDate(), length);
+            return dates;
+          },
+          getEmptyDate() {
+            return {date: null, class: "is-hidden-mobile disabled"};
+          },
         },
         components: {
             'calendar-date': CalendarDate
-        }
+        },
+        created() {
+          this.dates = this.getDates(now);
+        },
     }
 </script>
