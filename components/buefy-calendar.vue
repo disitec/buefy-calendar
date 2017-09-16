@@ -1,17 +1,17 @@
 ﻿<template>
     <div class="container">
         <div class="columns is-hidden-mobile">
-            <div class="column has-text-left"><a v-on:click="previous()"><i class="fa button is-primary fa-chevron-left"></i></a></div>
+            <div class="column has-text-left"><a @click="previous()"><i class="fa button is-primary fa-chevron-left"></i></a></div>
             <div class="column is-half has-text-centered"><h2 class="title is-2" v-text="monthAndYear"></h2></div>
-            <div class="column has-text-right"><a v-on:click="next()"><i class="fa button is-primary fa-chevron-right"></i></a></div>
+            <div class="column has-text-right"><a @click="next()"><i class="fa button is-primary fa-chevron-right"></i></a></div>
         </div>
 
         <div class="rows is-hidden-tablet">
-            <div class="row has-text-centered"><a v-on:click="previous()"><i class="button is-primary is-fullwidth fa fa-chevron-up"></i></a></div>
+            <div class="row has-text-centered"><a @click="previous()"><i class="button is-primary is-fullwidth fa fa-chevron-up"></i></a></div>
             <hr/>
             <div class="row has-text-centered"><h2 class="title is-2" v-text="monthAndYear"></h2></div>
             <hr/>
-            <div class="row has-text-centered"><a v-on:click="next()"><i class="button is-primary is-fullwidth fa fa-chevron-down"></i></a></div>
+            <div class="row has-text-centered"><a @click="next()"><i class="button is-primary is-fullwidth fa fa-chevron-down"></i></a></div>
         </div>
 
         <div class="tile is-ancestor">
@@ -24,11 +24,13 @@
             </div>
         </div>
 
-        <calendar-date :dates="dates" :events="events" :offset="0"></calendar-date>
-        <calendar-date :dates="dates" :events="events" :offset="7"></calendar-date>
-        <calendar-date :dates="dates" :events="events" :offset="14"></calendar-date>
-        <calendar-date :dates="dates" :events="events" :offset="21"></calendar-date>
-        <calendar-date :dates="dates" :events="events" :offset="28"></calendar-date>
+        <calendar-date
+                :key="n"
+                v-for="n in 5"
+                :events="appointments"
+                :dates="dates"
+                :offset="(n - 1) * 7"
+        ></calendar-date>
     </div>
 </template>
 
@@ -47,6 +49,12 @@
               "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
             ],
           },
+          months: {
+            type: Array,
+            default : [
+              'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
+            ]
+          },
           ordinals: {
             type: Boolean,
             default: true,
@@ -58,6 +66,7 @@
         },
         data() {
             return {
+                appointments: this.events,
                 showDates: true,
                 currentMonth: now,
                 dates: {},
@@ -65,7 +74,9 @@
         },
         computed: {
           monthAndYear() {
-            return this.currentMonth.format("MMMM YYYY", this.locale);
+            const month = this.currentMonth.format("M")
+            const year = this.currentMonth.format("YYYY")
+            return `${this.months[month - 1]} ${year}`;
           }
         },
         methods: {
@@ -101,11 +112,12 @@
             'calendar-date': CalendarDate
         },
         created() {
-          moment.locale("es", {
-            months : 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
-            monthsShort : 'ENE_FEB_MAR_ABR_MAY_JUN_JUL_AGO_SEP_OCT_NOV_DIC'.split('_'),
-          });
           this.dates = this.getDates(now);
+        },
+        watch: {
+          events() {
+            this.appointments = this.events;
+          }
         },
     }
 </script>
